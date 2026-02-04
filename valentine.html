@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine 💗</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: white;
+      overflow: hidden;
+      font-family: "Comic Sans MS", "Arial Rounded MT Bold", sans-serif;
+    }
+
+    .container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10;
+    }
+
+    h1 {
+      color: #ff4f9a;
+      font-size: 2rem;
+      margin-bottom: 30px;
+    }
+
+    #yes {
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff6aa2, #ff9acb);
+      color: white;
+      font-size: 1.3rem;
+      padding: 14px 34px;
+      box-shadow: 0 8px 20px rgba(255, 105, 180, 0.4);
+    }
+
+    #no {
+      position: fixed;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      background: #ffd1e6;
+      color: #a3004c;
+      padding: 10px 22px;
+      font-size: 0.9rem;
+      z-index: 20;
+      transition: transform 0.05s;
+    }
+
+    .shake {
+      animation: shake 0.2s infinite;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-2px, 2px); }
+      50% { transform: translate(2px, -2px); }
+      75% { transform: translate(-2px, -2px); }
+      100% { transform: translate(2px, 2px); }
+    }
+
+    .fake-message {
+      position: fixed;
+      color: #ff4f9a;
+      font-weight: bold;
+      font-size: 1rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    .celebration {
+      display: none;
+      text-align: center;
+    }
+
+    .celebration h2 {
+      color: #ff4f9a;
+      margin-top: 20px;
+      font-size: 2rem;
+    }
+
+    .celebration img {
+      max-width: 280px;
+      border-radius: 20px;
+    }
+
+    .heart {
+      position: absolute;
+      color: pink;
+      animation: float 8s linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes float {
+      from { transform: translateY(100vh); }
+      to { transform: translateY(-10vh); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="main">
+    <h1>Barev Sndiks 💗, would you be my valentine?</h1>
+    <button id="yes">YES</button>
+  </div>
+
+  <button id="no">no</button>
+  <div class="fake-message" id="fake">ALMOST 😏</div>
+
+  <div class="container celebration" id="celebration">
+    <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcTJiaXI3N3ZqMHcwbHh1bmYwYzc0djJzYTFmOXFpdW93MDJvYXhzeiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FKPrLmw9t5ZY877s64/giphy.gif" />
+    <h2>SHAT APRES SNDIKS 💗</h2>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById("no");
+    const yesBtn = document.getElementById("yes");
+    const fake = document.getElementById("fake");
+    const main = document.getElementById("main");
+    const celebration = document.getElementById("celebration");
+
+    const dangerRadius = 150;
+    const teaseRadius = 70;
+    const baseSpeed = 16;
+    const maxSpeed = 48;
+    const edgePadding = 10;
+
+    let speed = baseSpeed;
+    let lastSpeedIncrease = Date.now();
+    let fakeCooldown = false;
+
+    noBtn.style.left = "55%";
+    noBtn.style.top = "55%";
+
+    function maybeIncreaseSpeed() {
+      const now = Date.now();
+      if (now - lastSpeedIncrease > 1000 && speed < maxSpeed) {
+        speed += 2;
+        lastSpeedIncrease = now;
+      }
+    }
+
+    function showFakeMessage(x, y) {
+      if (fakeCooldown) return;
+      fakeCooldown = true;
+
+      fake.style.left = x + 10 + "px";
+      fake.style.top = y - 20 + "px";
+      fake.style.opacity = 1;
+
+      setTimeout(() => {
+        fake.style.opacity = 0;
+        fakeCooldown = false;
+      }, 500);
+    }
+
+    function moveAway(x, y) {
+      const rect = noBtn.getBoundingClientRect();
+      const btnX = rect.left + rect.width / 2;
+      const btnY = rect.top + rect.height / 2;
+
+      const dx = btnX - x;
+      const dy = btnY - y;
+      const distance = Math.hypot(dx, dy);
+
+      if (distance < dangerRadius) {
+        maybeIncreaseSpeed();
+
+        if (distance < teaseRadius) {
+          showFakeMessage(x, y);
+        }
+
+        const angle = Math.atan2(dy, dx);
+        let newX = rect.left + Math.cos(angle) * speed;
+        let newY = rect.top + Math.sin(angle) * speed;
+
+        const maxX = window.innerWidth - rect.width - edgePadding;
+        const maxY = window.innerHeight - rect.height - edgePadding;
+
+        const nearEdge =
+          newX <= edgePadding ||
+          newY <= edgePadding ||
+          newX >= maxX ||
+          newY >= maxY;
+
+        noBtn.classList.toggle("shake", nearEdge);
+
+        newX = Math.max(edgePadding, Math.min(maxX, newX));
+        newY = Math.max(edgePadding, Math.min(maxY, newY));
+
+        noBtn.style.left = `${newX}px`;
+        noBtn.style.top = `${newY}px`;
+      }
+    }
+
+    document.addEventListener("mousemove", e => {
+      moveAway(e.clientX, e.clientY);
+    });
+
+    document.addEventListener("touchmove", e => {
+      moveAway(e.touches[0].clientX, e.touches[0].clientY);
+    });
+
+    noBtn.addEventListener("click", () => {
+      alert("YOU ARE WRONG");
+      location.reload();
+    });
+
+    yesBtn.addEventListener("click", () => {
+      main.style.display = "none";
+      noBtn.style.display = "none";
+      fake.style.display = "none";
+      celebration.style.display = "block";
+    });
+
+    for (let i = 0; i < 25; i++) {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.textContent = "💗";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.animationDuration = 5 + Math.random() * 5 + "s";
+      heart.style.fontSize = 14 + Math.random() * 20 + "px";
+      document.body.appendChild(heart);
+    }
+  </script>
+
+</body>
+</html>
